@@ -1,0 +1,13 @@
+<WorldDefinitions version="0.1.0">
+  <BaseUnitInSvg>80</BaseUnitInSvg>
+  <!-- TODO Do I actually need map as tree, I would think I can just have it as info wrapper, not room wrapper. -->
+  <MapDefinitions>
+    <MapWidth>40</MapWidth>
+    <MapHeight>40</MapHeight>
+  </MapDefinitions>
+  <Room xpos="4" ypos="4" width="4" height="2">
+    <!-- rotation? wall thickness -->
+    <Door startx="" starty="" endx="" endy="" width="1" /> <!-- type-of-door(double, single), hinge(left/right) (in or out)-->
+    <Window></Window>
+  </Room>
+</WorldDefinitions>
