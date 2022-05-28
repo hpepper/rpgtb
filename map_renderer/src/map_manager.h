@@ -5,6 +5,7 @@
 #include <string>
 #include <tinyxml2.h>
 #include "xml_if.h"
+#include "room.h"
 
 
 
@@ -34,8 +35,11 @@ public:
 
     int renderEntities();
 
-    int getMapHeight() {return(m_mapHeight*m_baseUnitInSvg);};
-    int getMapWidth() {return(m_mapWidth*m_baseUnitInSvg);};
+    int getMapHeight() {return(m_mapHeight);};
+    int getMapWidth() {return(m_mapWidth);};
+
+    Room *getFirstRoom();
+    Room *getNextRoom();
 
 
 private:
@@ -46,6 +50,9 @@ private:
     int m_baseUnitInSvg = 0;
     int m_mapHeight = 25;
     int m_mapWidth = 25;
+
+    std::list<Room*> m_roomList;
+    std::list<Room*>::iterator m_roomIterator;
 
     int populateMapListFromXml(tinyxml2::XMLElement *);
     int readMapDefinitions(tinyxml2::XMLElement *, std::string);

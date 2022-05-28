@@ -12,6 +12,7 @@ LIBS=-ltinyxml2 -ldl
 SOURCES  := trace.cpp \
 			xml_if.cpp \
 			map_manager.cpp \
+			room.cpp \
 			svg_renderer.cpp
 
 INCLUDES := $(SOURCES:.cpp=.h)

@@ -44,6 +44,17 @@ int SvgRenderer::leadOut()
 }
 
 /**
+ * @brief Render the given room.
+ * 
+ * @param room 
+ */
+void SvgRenderer::renderRoom(Room *room) {
+
+    m_svgFile << "<rect x=\"" << room->getStartX() << "\" y=\"" << room->getStartY() << "\" width=\""<< room->getWidth() <<"\" height=\""<< room->getHeight() <<"\" stroke=\"black\" fill=\"transparent\" stroke-width=\"1\"/>\n";
+
+}
+
+/**
  * @brief render the user map, as SVG file
  *
  * @param filename - full name of the file to be generated.
@@ -54,6 +65,8 @@ int SvgRenderer::renderUserMap(std::string filename)
     int nStatus = 0;
     m_svgFile.open(filename);
     nStatus = leadIn();
+    Room *room = m_mapMananger->getFirstRoom();
+    renderRoom(room);
     nStatus = leadOut();
     return (nStatus);
 }

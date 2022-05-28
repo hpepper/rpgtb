@@ -1,5 +1,5 @@
 <WorldDefinitions version="0.1.0">
-  <BaseUnitInSvg>80</BaseUnitInSvg>
+  <BaseUnitInSvg>10</BaseUnitInSvg>
   <!-- TODO Do I actually need map as tree, I would think I can just have it as info wrapper, not room wrapper. -->
   <MapDefinitions>
     <MapWidth>40</MapWidth>

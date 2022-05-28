@@ -19,6 +19,32 @@ MapManager::~MapManager()
 }
 
 /**
+ * @brief get first room of of m_roomList
+ * 
+ * This will not work in a threat setting, if it is the samme MapManager class
+ *  that is accessed from two different threats. Due to the m_roomIterator
+ *  could be initialized at the same time the other process calls getNextRoom.
+ * 
+ * @return Room* 
+ */
+Room *MapManager::getFirstRoom()
+{
+    m_roomIterator = m_roomList.begin();
+    return (*m_roomIterator);
+}
+
+Room *MapManager::getNextRoom()
+{
+    Room *roomPointer = nullptr;
+    if (m_roomIterator != m_roomList.end())
+    {
+        ++m_roomIterator;
+        roomPointer = *m_roomIterator;
+    }
+    return(roomPointer);
+}
+
+/**
  * @brief return the number of wall elements
  *
  * TODO used for?
@@ -66,28 +92,29 @@ int MapManager::populateFromFile(std::string fileName, std::string directoryPath
     readMapDefinitions(m_xmlRoot, "MapDefinitions");
     ABORT_IF_TRUE(m_baseUnitInSvg == 0, "!!! <BaseUnitInSvg> is not defined or filled out in the xml.");
     std::cout << "DDD BaseUnitInSvg: " << m_baseUnitInSvg << "\n";
-    // TODO read the BaseUnitInSvg
-    // TODO read SpawnPoints
-    // TODO first itterate Map entries
-    // TODO Create and XmlIf get first sub element.
     tinyxml2::XMLElement *xmlEnvironmentElement = m_xmlRoot->FirstChildElement("Room");
     // From https://stackoverflow.com/questions/7942191/how-to-handle-tinyxml-null-pointer-returned-on-gettext
     ABORT_IF_FALSE(xmlEnvironmentElement != nullptr, "No child element named 'Room'");
     while (xmlEnvironmentElement != nullptr)
     {
+        // TODO Create a Room instance and give the roomXml element to that instance
+        Room *room = new Room(m_baseUnitInSvg);
+        // Then load the room
+        room->loadXmlRoom(xmlEnvironmentElement);
+        m_roomList.push_back(room);
+        // TODO the room will handle windows etc.
         xmlEnvironmentElement = xmlEnvironmentElement->NextSiblingElement("Room");
     }
     // TODO read all Environment (TODO later be able to support other env type than wall )
     return (nStatus);
 }
 
-
 /**
  * @brief Read the map definitions from the ownerTagName
- * 
+ *
  * @param xmlParent - the XML element that holds the <ownerTagName>
  * @param ownerTagName - name of the map definitions tag.
- * @return int 
+ * @return int
  */
 int MapManager::readMapDefinitions(tinyxml2::XMLElement *xmlParent, std::string ownerTagName)
 {
@@ -95,11 +122,12 @@ int MapManager::readMapDefinitions(tinyxml2::XMLElement *xmlParent, std::string 
 
     tinyxml2::XMLElement *xmlMapDefinitionElement = xmlParent->FirstChildElement(ownerTagName.c_str());
 
-    m_mapHeight = m_xmlif.getChildIntOfFirtSubElementName(xmlMapDefinitionElement, "MapHeight");
-    m_mapWidth = m_xmlif.getChildIntOfFirtSubElementName(xmlMapDefinitionElement, "MapWidth");
+    m_mapHeight = m_xmlif.getChildIntOfFirtSubElementName(xmlMapDefinitionElement, "MapHeight") * m_baseUnitInSvg;
+    m_mapWidth = m_xmlif.getChildIntOfFirtSubElementName(xmlMapDefinitionElement, "MapWidth") * m_baseUnitInSvg;
     std::cout << "DDD m_mapWidth: " << m_mapWidth << "\n";
 
-    if ( m_mapWidth * m_mapHeight == 0) {
+    if (m_mapWidth * m_mapHeight == 0)
+    {
         nStatus = -1;
     }
 

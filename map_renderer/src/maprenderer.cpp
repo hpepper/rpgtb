@@ -14,13 +14,15 @@
 // TODO get xml filename as an XML
 int main()
 {
-    std::cout << "Version: 0.2.0" << std::endl;
+    std::cout << "Version: 0.3.0" << std::endl;
 
     MapManager *mapMananger = new MapManager();
 
+    std::cout << "DDD manager created." << std::endl;
+
     ABORT_IF_FALSE(mapMananger->populateFromFile("unittests/test_lab.xml", "./") == 0, "!!! Map load failed.");
 
-    SvgRenderer * svgRenderer = new SvgRenderer(mapMananger);
+    SvgRenderer *svgRenderer = new SvgRenderer(mapMananger);
     svgRenderer->renderUserMap("first_map.svg");
 
     return (0);

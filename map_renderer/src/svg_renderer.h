@@ -3,7 +3,7 @@
 
 #include "map_manager.h"
 
-#include <fstream> 
+#include <fstream>
 
 class SvgRenderer
 {
@@ -11,6 +11,7 @@ public:
     SvgRenderer(MapManager *);
     ~SvgRenderer();
 
+    void renderRoom(Room *);
     int renderUserMap(std::string);
     int renderGameMasterMap(std::string);
 
