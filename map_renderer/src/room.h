@@ -1,6 +1,8 @@
 #ifndef ROOM_H
 #define ROOM_H
 
+#include "door.h"
+#include <list>
 #include <tinyxml2.h>
 #include "xml_if.h"
 
@@ -16,6 +18,9 @@ public:
     int getHeight(){return(m_height);}
     int loadXmlRoom(tinyxml2::XMLElement *);
 
+    Door *getFirstDoor();
+    Door *getNextDoor();
+
 
 private:
     int m_baseUnitInSvg = 0;
@@ -27,7 +32,9 @@ private:
 
     XmlIf m_xmlIf;
 
-    // TODO list of doors
+    std::list<Door*> m_doorList;
+    std::list<Door*>::iterator m_doorIterator;
+
     // TODO list of windows
 };
 

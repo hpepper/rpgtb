@@ -9,11 +9,12 @@ LIBS=-ltinyxml2 -ldl
 # -ldl to get dladdr()
 
 # See: https://stackoverflow.com/questions/7004702/how-can-i-create-a-makefile-for-c-projects-with-src-obj-and-bin-subdirectories
-SOURCES  := trace.cpp \
-			xml_if.cpp \
+SOURCES  := door.cpp \
 			map_manager.cpp \
 			room.cpp \
-			svg_renderer.cpp
+			svg_renderer.cpp \
+			trace.cpp \
+			xml_if.cpp
 
 INCLUDES := $(SOURCES:.cpp=.h)
 OBJECTS  := $(SOURCES:.cpp=.o)

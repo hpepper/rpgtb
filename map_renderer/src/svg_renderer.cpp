@@ -2,7 +2,7 @@
 /**
  * Description
  */
-
+#include <cmath>
 #include "svg_renderer.h"
 #include "trace.h"
 
@@ -43,15 +43,65 @@ int SvgRenderer::leadOut()
     return (nStatus);
 }
 
+void SvgRenderer::renderDoor(Door *door, int roomBaseX, int roomBaseY)
+{
+
+    // Calculate the door width
+    int deltaX = door->getEndX() - door->getStartX();
+    int deltaY = door->getEndY() - door->getStartY();
+    double doorLength = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
+    std::cout << "DDD renderDoor() deltaX: " << deltaX << "\n";
+    std::cout << "DDD renderDoor() deltaY: " << deltaY << "\n";
+    std::cout << "DDD renderDoor() doorLength: " << doorLength << std::endl;
+    // TODO find the start angle
+    double pi = 3.14;
+    int degrees = -25;
+    double radians = (degrees * pi) / 180;
+    int newX = deltaX * cos(radians) - deltaY * sin(radians);
+    int newY = deltaX * sin(radians) + deltaY * cos(radians);
+
+    int startX = roomBaseX + door->getStartX();
+    int startY = roomBaseY + door->getStartY();
+    std::cout << "DDD renderDoor() startX: " << startX << "\n";
+    std::cout << "DDD renderDoor() startY: " << startY << "\n";
+    m_svgFile << "<line x1=\"" << startX << "\"";
+    m_svgFile << " y1=\"" << startY << "\"";
+    m_svgFile << " x2=\"" << startX + newX << "\"";
+    m_svgFile << " y2=\"" << startY + newY << "\"";
+    m_svgFile << " stroke=\"black\" fill=\"transparent\"";
+    m_svgFile << " stroke-width=\"" << m_doorStrokeWidth << "\"/>\n";
+
+    int xAxisRotation = 0; // TODO figure out how to do this
+    int largeArcFlag = 0;
+    int sweepFlag = 0;
+
+    // do the arc
+    m_svgFile << "<path d=\"M " << roomBaseX + door->getEndX() << " " << roomBaseX + door->getEndY() << "";
+    // A rx ry x-axis-rotation large-arc-flag sweep-flag x y
+    int doorArcRadius = 10; // TODO how to calculate this?
+    m_svgFile << " A " << doorArcRadius << " " << doorArcRadius << ",";
+    m_svgFile << " " << xAxisRotation << ", ";
+    m_svgFile << " " << largeArcFlag << ", ";
+    m_svgFile << " " << sweepFlag << ", ";
+    m_svgFile << " " << startX + newX << " " << startY + newY << "\"";
+    // m_svgFile << " fill=\"transparent\"";
+    m_svgFile << " stroke-width=\""<< m_doorStrokeWidth <<"\"/>";
+}
+
 /**
  * @brief Render the given room.
- * 
- * @param room 
+ *
+ * @param room
  */
-void SvgRenderer::renderRoom(Room *room) {
+void SvgRenderer::renderRoom(Room *room)
+{
 
-    m_svgFile << "<rect x=\"" << room->getStartX() << "\" y=\"" << room->getStartY() << "\" width=\""<< room->getWidth() <<"\" height=\""<< room->getHeight() <<"\" stroke=\"black\" fill=\"transparent\" stroke-width=\"1\"/>\n";
+    m_svgFile << "<rect x=\"" << room->getStartX() << "\" y=\"" << room->getStartY() << "\" width=\"" << room->getWidth() << "\" height=\"" << room->getHeight() << "\" stroke=\"black\" fill=\"transparent\" stroke-width=\"" << m_wallStrokeWidth << "\"/>\n";
+    // TODO Render all doors
+    Door *door = room->getFirstDoor();
+    renderDoor(door, room->getStartX(), room->getStartY());
 
+    // TODO Render all windows
 }
 
 /**

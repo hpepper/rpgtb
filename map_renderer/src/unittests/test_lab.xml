@@ -5,9 +5,9 @@
     <MapWidth>40</MapWidth>
     <MapHeight>40</MapHeight>
   </MapDefinitions>
-  <Room xpos="4" ypos="4" width="4" height="2">
+  <Room xpos="4" ypos="4" width="7" height="3">
     <!-- rotation? wall thickness -->
-    <Door startx="" starty="" endx="" endy="" width="1" /> <!-- type-of-door(double, single), hinge(left/right) (in or out)-->
+    <Door startx="7" starty="1" endx="7" endy="2" sections="1" /> <!-- type-of-door(double, single), hinge(left/right) (in or out)-->
     <Window></Window>
   </Room>
 </WorldDefinitions>

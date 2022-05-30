@@ -45,18 +45,6 @@ Room *MapManager::getNextRoom()
 }
 
 /**
- * @brief return the number of wall elements
- *
- * TODO used for?
- *
- * @return int
- */
-int MapManager::getNumberOfEnvironmentWalls()
-{
-    return (-1);
-}
-
-/**
  * TODO delete all sub classes
  * @param fileName - Name of xml to load.
  */
