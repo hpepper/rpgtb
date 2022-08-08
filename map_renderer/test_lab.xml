@@ -7,7 +7,7 @@
   </MapDefinitions>
   <Room xpos="4" ypos="4" width="7" height="3">
     <comment>rotation? wall thickness</comment>
-    <Door startx="7" starty="1" endx="7" endy="2" sections="1" /><comment>type-of-door(double, single), hinge(left/right) (in or out)</comment>
+    <Door startx="7" starty="1" endx="7" endy="2" sections="1"/><comment>type-of-door(double, single), hinge(left/right) (in or out)</comment>
     <Window></Window>
   </Room>
 </WorldDefinitions>
