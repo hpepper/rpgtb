@@ -80,6 +80,7 @@ int MapManager::populateFromFile(std::string fileName, std::string directoryPath
     readMapDefinitions(m_xmlRoot, "MapDefinitions");
     ABORT_IF_TRUE(m_baseUnitInSvg == 0, "!!! <BaseUnitInSvg> is not defined or filled out in the xml.");
     std::cout << "DDD BaseUnitInSvg: " << m_baseUnitInSvg << "\n";
+    
     tinyxml2::XMLElement *xmlEnvironmentElement = m_xmlRoot->FirstChildElement("Room");
     // From https://stackoverflow.com/questions/7942191/how-to-handle-tinyxml-null-pointer-returned-on-gettext
     ABORT_IF_FALSE(xmlEnvironmentElement != nullptr, "No child element named 'Room'");
