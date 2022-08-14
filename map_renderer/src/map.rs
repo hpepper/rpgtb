@@ -29,9 +29,10 @@ fn render_door(file_handle: &mut File, door: &crate::Door, room_base_x: usize, r
 
     // These three line is my convoluted way to get the sqrt of the a² + b²
     //  I know not how to to the sqrt directly
-    let length = delta_x.pow(2) + delta_y.pow(2);
-    let float_length: f32 = length as f32;
-    let door_width:f32 = float_length.sqrt();
+    // let length = delta_x.pow(2) + delta_y.pow(2);
+    // let float_length: f32 = length as f32;
+    // TODO where should I use this?
+    // let door_width:f32 = float_length.sqrt();
 
     let pi = 3.14;
     let degrees: f32 = -25.0;

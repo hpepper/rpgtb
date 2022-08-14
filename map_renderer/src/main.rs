@@ -21,7 +21,6 @@ pub struct Door {
     m_start_y: usize,
     m_end_x: usize,
     m_end_y: usize,
-    m_number_of_sections: usize,
 }
 
 fn read_map_definitions(xml_root: &Element, base_unit_in_svg: usize) -> (usize, usize) {
@@ -46,19 +45,16 @@ fn load_a_door(xml_door: &Element, base_unit_in_svg: usize) -> Door {
     let ypos_str = xml_door.attr("starty").unwrap();
     let endx_str = xml_door.attr("endx").unwrap();
     let endy_str = xml_door.attr("endy").unwrap();
-    let sections_str = xml_door.attr("sections").unwrap();
     let xpos: usize = xpos_str.parse().unwrap();
     let ypos: usize = ypos_str.parse().unwrap();
     let endx: usize = endx_str.parse().unwrap();
     let endy: usize = endy_str.parse().unwrap();
-    let number_of_sections: usize = sections_str.parse().unwrap();
 
     Door {
         m_start_x: xpos * base_unit_in_svg,
         m_start_y: ypos * base_unit_in_svg,
         m_end_x: endx * base_unit_in_svg,
         m_end_y: endy * base_unit_in_svg,
-        m_number_of_sections: number_of_sections,
     }
 }
 
