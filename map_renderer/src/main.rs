@@ -65,7 +65,6 @@ fn load_all_doors_in_a_room(xml_room: &Element, base_unit_in_svg: usize) -> Vec<
     println!("load_door()  elment name: {}", xml_room.name());
     let mut door_list: Vec<Door> = Vec::new();
     for xml_child in xml_room.children() {
-        println!(" - '{}'", xml_child.name());
         if xml_child.name() == "Door" {
             let door = load_a_door(xml_child, base_unit_in_svg);
             door_list.push(door);
@@ -74,8 +73,7 @@ fn load_all_doors_in_a_room(xml_room: &Element, base_unit_in_svg: usize) -> Vec<
     door_list
 }
 
-fn load_a_room(xml_root: &Element, base_unit_in_svg: usize) -> Room {
-    let xml_room = xml_root.get_child("Room", DEFAULT_NAME_SPACE).unwrap();
+fn load_a_room(xml_room: &Element, base_unit_in_svg: usize) -> Room {
 
     let xpos_str = xml_room.attr("xpos").unwrap();
     let ypos_str = xml_room.attr("ypos").unwrap();
@@ -95,6 +93,22 @@ fn load_a_room(xml_root: &Element, base_unit_in_svg: usize) -> Room {
     }
 }
 
+/**
+ * load all rooms, given in xml_root return as a vector.
+ */
+fn load_all_rooms(xml_root: &Element, base_unit_in_svg: usize) -> Vec<Room> {
+    println!("load_all_rooms()  elment name: {}", xml_root.name());
+    let mut room_list: Vec<Room> = Vec::new();
+    for xml_child in xml_root.children() {
+        if xml_child.name() == "Room" {
+            let room = load_a_room(xml_child, base_unit_in_svg);
+            room_list.push(room);
+        }
+    }
+    room_list
+}
+
+
 fn main() {
     let xml_string = fs::read_to_string("test_lab.xml").expect("File not found");
 
@@ -108,8 +122,8 @@ fn main() {
 
     let (map_width, map_height) = read_map_definitions(&xml_root, base_unit_in_svg);
 
-    let a_room = load_a_room(&xml_root, base_unit_in_svg);
+    let room_list: Vec<Room> = load_all_rooms(&xml_root, base_unit_in_svg);
 
     // TODO RESUME: create the render module and do the lead in and lead out of that.
-    map::render(map_width, map_height, a_room);
+    map::render(map_width, map_height, room_list);
 }

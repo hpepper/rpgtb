@@ -54,7 +54,7 @@ fn render_door(file_handle: &mut File, door: &crate::Door, room_base_x: usize, r
 }
 
 
-fn render_room(file_handle: &mut File, room: crate::Room) {
+fn render_room(file_handle: &mut File, room: &crate::Room) {
     let line_thickness: usize = 2;
     file_handle.write(&format!("<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" stroke=\"black\" fill=\"transparent\" stroke-width=\"{}\"/>\n", room.m_start_x, room.m_start_y, room.m_width, room.m_height, line_thickness).as_bytes()).expect("file write error");
     for door in room.door_list.iter() {
@@ -63,10 +63,12 @@ fn render_room(file_handle: &mut File, room: crate::Room) {
 }
 
 // TODO
-pub fn render(map_width: usize, map_height: usize, room: crate::Room) {
+pub fn render(map_width: usize, map_height: usize, room_list: Vec<crate::Room>) {
     println!("DDD render");
     let mut file_handle = File::create("test.svg").expect("Error encountered while creating file!");
     lead_in(&mut file_handle, map_width, map_height);
-    render_room(&mut file_handle, room);
+    for room in room_list.iter() {
+        render_room(&mut file_handle, room);
+    }
     lead_out(&mut file_handle);
 }
