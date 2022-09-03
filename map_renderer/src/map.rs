@@ -54,21 +54,30 @@ fn render_door(file_handle: &mut File, door: &crate::Door, room_base_x: usize, r
 }
 
 
-fn render_room(file_handle: &mut File, room: &crate::Room) {
+fn render_room(file_handle: &mut File, room: &crate::Room, gms_map: bool) {
     let line_thickness: usize = 2;
     file_handle.write(&format!("<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" stroke=\"black\" fill=\"transparent\" stroke-width=\"{}\"/>\n", room.m_start_x, room.m_start_y, room.m_width, room.m_height, line_thickness).as_bytes()).expect("file write error");
+    if gms_map {
+        // TODO fix it so the text is always in the room, no matter what direction the rooom is drawn(left-to-right, or right-to-left)
+        file_handle.write(&format!("  <text x=\"{}\" y=\"{}\" fill=\"red\">{}</text>\n", room.m_start_x+2, room.m_start_y+12, room.gm_note).as_bytes()).expect("file write error");
+    }
+    // 
     for door in room.door_list.iter() {
         render_door(file_handle, door, room.m_start_x, room.m_start_y);
     }
 }
 
-// TODO
-pub fn render(map_width: usize, map_height: usize, room_list: Vec<crate::Room>) {
-    println!("DDD render");
-    let mut file_handle = File::create("test.svg").expect("Error encountered while creating file!");
+fn render_to_file(file_name: &str, map_width: usize, map_height: usize, room_list: &Vec<crate::Room>, gms_map: bool) {
+    let mut file_handle = File::create(file_name).expect("Error encountered while creating file!");
     lead_in(&mut file_handle, map_width, map_height);
     for room in room_list.iter() {
-        render_room(&mut file_handle, room);
+        render_room(&mut file_handle, room, gms_map);
     }
     lead_out(&mut file_handle);
+}
+
+pub fn render(map_width: usize, map_height: usize, room_list: Vec<crate::Room>) {
+    println!("DDD render");
+    render_to_file("player_test.svg", map_width,map_height,  &room_list,false);
+    render_to_file("gm_test.svg", map_width,map_height,  &room_list,true);
 }
