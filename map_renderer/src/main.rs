@@ -7,7 +7,7 @@ use std::fs::File;
 
 const DEFAULT_NAME_SPACE: &str = "minidom";
 
-const APPLICATION_VERSION: &str = "0.2.3";
+const APPLICATION_VERSION: &str = "0.2.4";
 
 fn main() {
     let args: Vec<String> = env::args().collect();

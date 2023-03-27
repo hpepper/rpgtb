@@ -49,11 +49,10 @@ pub fn render_door(file_handle: &mut File, door: &crate::Door, room_base_x: usiz
 
     let end_x_open_door = start_x as f32 + new_x;
     let end_y_open_door = start_y as f32 - new_y;
-    
-    file_handle.write(&format!("<line x1=\"{}\"", start_x).as_bytes()).expect("file write error");
-    file_handle.write(&format!(" y1=\"{}\"", start_y).as_bytes()).expect("file write error");
-    file_handle.write(&format!(" x2=\"{}\"", start_x as f32 + new_x).as_bytes()).expect("file write error");
-    file_handle.write(&format!(" y2=\"{}\"", start_y as f32 - new_y).as_bytes()).expect("file write error");
+
+    file_handle.write(&format!("<path d=\"M {} {}", start_x, start_y).as_bytes()).expect("file write error");
+    file_handle.write(&format!(" l {} {}",  new_x, -new_y).as_bytes()).expect("file write error");
+    file_handle.write(&format!(" \"").as_bytes()).expect("file write error");
     file_handle.write(&format!(" stroke=\"black\" fill=\"transparent\"").as_bytes()).expect("file write error");
     file_handle.write(&format!(" stroke-width=\"{}\"", line_thickness).as_bytes()).expect("file write error");
     file_handle.write(&format!("/>\n").as_bytes()).expect("file write error");
