@@ -1,0 +1,4 @@
+# See: https://doc.rust-lang.org/cargo/reference/config.html
+[build]
+target-dir = "/tmp/rust_build/map_renderer"
+

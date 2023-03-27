@@ -1,27 +1,187 @@
-mod map;
+mod map_to_svg;
 
 use minidom::Element;
+use std::env;
 use std::fs;
+use std::fs::File;
 
 const DEFAULT_NAME_SPACE: &str = "minidom";
 
+const APPLICATION_VERSION: &str = "0.2.3";
+
 fn main() {
-    let xml_string = fs::read_to_string("test_lab.xml").expect("File not found");
+    let args: Vec<String> = env::args().collect();
 
-    let xml_root: Element = xml_string.parse().unwrap();
-    // let version = xml_root.attr("version").unwrap();
-    let xml_base_unit_svg = xml_root
-        .get_child("BaseUnitInSvg", DEFAULT_NAME_SPACE)
-        .unwrap();
-    let baseunit_text = xml_base_unit_svg.text();
-    let base_unit_in_svg: usize = baseunit_text.parse().unwrap();
+    let mut args_iterator = args.iter();
 
-    let (map_width, map_height) = read_map_definitions(&xml_root, base_unit_in_svg);
+    let mut local_configuration = ConfigurationInformation::new();
 
-    let room_list: Vec<Room> = load_all_rooms(&xml_root, base_unit_in_svg);
+    let mut door_mode = false;
 
-    // TODO RESUME: create the render module and do the lead in and lead out of that.
-    map::render(map_width, map_height, room_list);
+    // Skip the application name thing ($0)
+    args_iterator.next();
+
+    loop {
+        match args_iterator.next() {
+            Some(parameter) => {
+                match parameter.as_str() {
+                    "--door-mode" => {
+                        door_mode = true;
+                    },
+                    "--door-sections" => local_configuration.set_door_sections(args_iterator.next()),
+                    "--door-width" => local_configuration.set_door_width(args_iterator.next()),
+                    "--help" => show_help(),
+                    "--input-file" => local_configuration.set_input_file(args_iterator.next()),
+                    "--gm-map-file" => local_configuration.set_gm_map_file(args_iterator.next()),
+                    "--player-map-file" =>
+                        local_configuration.set_player_map_file(args_iterator.next()),
+                    "--version" => println!("{}", APPLICATION_VERSION),
+                    _ => println!("EEE unknown option: '{}'", parameter),
+                }
+            }
+            None => {
+                break;
+            }
+        }
+    }
+
+    if door_mode {
+
+        // TODO if there are two sections then split the door.
+
+        let endx= local_configuration.get_door_width();
+        let endy: usize = 100;
+        let door = Door {
+            m_start_x: 10,
+            m_start_y: 100,
+            m_end_x: endx,
+            m_end_y: endy,
+        };
+
+        let mut file_handle = File::create("tmp_door.svg").expect("Error encountered while creating file!");
+
+        map_to_svg::lead_in(&mut file_handle, endx + 20, endx + 100);
+        map_to_svg::render_door(&mut file_handle, &door, 0, 0);
+        map_to_svg::lead_out(&mut file_handle);
+    } else {
+        let xml_string = fs
+            ::read_to_string(local_configuration.get_input_file_name())
+            .expect("File not found");
+
+        let xml_root: Element = xml_string.parse().unwrap();
+        // let version = xml_root.attr("version").unwrap();
+        let xml_base_unit_svg = xml_root.get_child("BaseUnitInSvg", DEFAULT_NAME_SPACE).unwrap();
+        let baseunit_text = xml_base_unit_svg.text();
+        let base_unit_in_svg: usize = baseunit_text.parse().unwrap();
+
+        let (map_width, map_height) = read_map_definitions(&xml_root, base_unit_in_svg);
+
+        let room_list: Vec<Room> = load_all_rooms(&xml_root, base_unit_in_svg);
+
+        // TODO RESUME: create the render module and do the lead in and lead out of that.
+        map_to_svg::render(
+            local_configuration.get_player_map_file_name(),
+            local_configuration.get_gm_map_file_name(),
+            map_width,
+            map_height,
+            room_list
+        );
+    }
+}
+
+fn show_help() {
+    println!("Render svg map from xml definition file - help text");
+    println!("  --door-mode                   : only generate the code for a door");
+    println!("  --door-sections <units>       : door units, default 1");
+    println!("  --door-width <units>          : door width in units");
+    println!("  --gm-map-file <file_name>     : set the output file name, for the gm map");
+    println!("  --help                        : this text");
+    println!("  --input-file  <file_name>     : set the input file name");
+    println!("  --player-map-file <file_name> : set the output file name, for the gm map");
+    println!("  --version                     : show application version number({})", APPLICATION_VERSION);
+}
+
+#[derive(Debug)]
+struct ConfigurationInformation {
+    door_sections: usize,
+    door_width: usize,
+    gm_map_file: String,
+    input_file: String,
+    player_map_file: String,
+}
+
+impl ConfigurationInformation {
+    fn new() -> Self {
+        Self {
+            door_sections: 1,
+            door_width: 100,
+            gm_map_file: "gm_map.svg".to_string(),
+            input_file: "test_lab.xml".to_string(),
+            player_map_file: "player_map.svg".to_string(),
+        }
+    }
+    fn get_door_sections(self) -> usize {
+        self.door_sections
+    }
+    fn get_door_width(self) -> usize {
+        self.door_width
+    }
+    fn get_input_file_name<'a>(&'a self) -> &'a str {
+        &self.input_file
+    }
+
+    fn get_gm_map_file_name<'a>(&'a self) -> &'a str {
+        &self.gm_map_file
+    }
+
+    fn get_player_map_file_name<'a>(&'a self) -> &'a str {
+        &self.player_map_file
+    }
+
+    fn set_door_sections(&mut self, parameter: Option<&String>) {
+        match parameter {
+            Some(filename) => {
+                self.door_sections = filename.parse::<usize>().unwrap();
+            }
+            None => { println!("EEE the parameter was not there set_door_width()") }
+        }
+    }
+
+    fn set_door_width(&mut self, parameter: Option<&String>) {
+        match parameter {
+            Some(filename) => {
+                self.door_width = filename.parse::<usize>().unwrap();
+            }
+            None => { println!("EEE the parameter was not there set_door_width()") }
+        }
+    }
+
+    fn set_gm_map_file(&mut self, parameter: Option<&String>) {
+        match parameter {
+            Some(filename) => {
+                self.gm_map_file = filename.clone();
+            }
+            None => { println!("EEE the parameter was not there set_gm_map_file()") }
+        }
+    }
+
+    fn set_player_map_file(&mut self, parameter: Option<&String>) {
+        match parameter {
+            Some(filename) => {
+                self.player_map_file = filename.clone();
+            }
+            None => { println!("EEE the parameter was not there set_player_map_file()") }
+        }
+    }
+
+    fn set_input_file(&mut self, parameter: Option<&String>) {
+        match parameter {
+            Some(filename) => {
+                self.input_file = filename.clone();
+            }
+            None => { println!("EEE the parameter was not there set_input_file()") }
+        }
+    }
 }
 
 // TODO move this to its own file(module?)
@@ -35,6 +195,7 @@ pub struct Room {
     // TODO window list
 }
 
+#[derive(Debug)]
 pub struct Door {
     m_start_x: usize,
     m_start_y: usize,
@@ -43,15 +204,9 @@ pub struct Door {
 }
 
 fn read_map_definitions(xml_root: &Element, base_unit_in_svg: usize) -> (usize, usize) {
-    let xml_map_definitions = xml_root
-        .get_child("MapDefinitions", DEFAULT_NAME_SPACE)
-        .unwrap();
-    let xml_map_width = xml_map_definitions
-        .get_child("MapWidth", DEFAULT_NAME_SPACE)
-        .unwrap();
-    let xml_map_height = xml_map_definitions
-        .get_child("MapHeight", DEFAULT_NAME_SPACE)
-        .unwrap();
+    let xml_map_definitions = xml_root.get_child("MapDefinitions", DEFAULT_NAME_SPACE).unwrap();
+    let xml_map_width = xml_map_definitions.get_child("MapWidth", DEFAULT_NAME_SPACE).unwrap();
+    let xml_map_height = xml_map_definitions.get_child("MapHeight", DEFAULT_NAME_SPACE).unwrap();
     let width: usize = xml_map_width.text().parse().unwrap();
     let height: usize = xml_map_height.text().parse().unwrap();
     (width * base_unit_in_svg, height * base_unit_in_svg)
@@ -137,7 +292,7 @@ fn get_text_from_child_element(xml_element: &Element, child_element_name: &str) 
 // For a good explanation of lifetime, please see: https://www.youtube.com/watch?v=1QoT9fmPYr8
 fn get_first_xml_child_by_tag_name<'a>(
     xml_element: &'a minidom::Element,
-    child_element_name: &str,
+    child_element_name: &str
 ) -> Option<&'a minidom::Element> {
     for xml_child in xml_element.children() {
         if xml_child.name() == child_element_name {

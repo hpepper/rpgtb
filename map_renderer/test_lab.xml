@@ -1,13 +1,40 @@
 <WorldDefinitions version="0.1.0" xmlns="minidom">
-  <BaseUnitInSvg>10</BaseUnitInSvg>
+  <BaseUnitInSvg>20</BaseUnitInSvg>
   <comment>TODO Do I actually need map as tree, I would think I can just have it as info wrapper, not room wrapper.</comment>
   <MapDefinitions>
     <MapWidth>40</MapWidth>
     <MapHeight>40</MapHeight>
   </MapDefinitions>
   <Room xpos="4" ypos="4" width="7" height="3">
+    <gm_note>secret lab</gm_note>
     <comment>rotation? wall thickness</comment>
     <Door startx="7" starty="1" endx="7" endy="2" sections="1"/><comment>type-of-door(double, single), hinge(left/right) (in or out)</comment>
+    <Window></Window>
+  </Room>
+  <Room xpos="4" ypos="7" width="7" height="3">
+    <gm_note>3D printer room</gm_note>
+    <comment>rotation? wall thickness</comment>
+    <Door startx="7" starty="1" endx="7" endy="2" sections="1"/><comment>type-of-door(double, single), hinge(left/right) (in or out)</comment>
+    <Window></Window>
+  </Room>
+  <Room xpos="4" ypos="10" width="7" height="3">
+    <gm_note>Custodian room</gm_note>
+    <Door startx="7" starty="1" endx="7" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="4" ypos="13" width="7" height="4">
+    <gm_note>Prototype</gm_note>
+    <Door startx="7" starty="1" endx="7" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="4" ypos="17" width="7" height="4">
+    <gm_note>Design</gm_note>
+    <Door startx="7" starty="1" endx="7" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="4" ypos="21" width="7" height="6">
+    <gm_note>Mødelokale</gm_note>
+    <Door startx="7" starty="1" endx="7" endy="2" sections="1"/>
     <Window></Window>
   </Room>
 </WorldDefinitions>

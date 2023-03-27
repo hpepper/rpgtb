@@ -2,3 +2,5 @@ Read Map definition
 Read Room attributes
 Write generator that will generate that room
 Add room features(should the rendere know what it is rendereing? like rendering a door?
+
+Add windows

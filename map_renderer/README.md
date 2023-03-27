@@ -5,3 +5,9 @@
 ### References
 
 * [Quick XML documentation](https://docs.rs/quick-xml/latest/quick_xml/#modules)
+
+### Usage
+
+#### Generate doors
+
+* make; map_renderer --door-mode --door-width 200 && eog tmp_door.svg
