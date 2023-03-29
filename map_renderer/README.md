@@ -10,4 +10,4 @@
 
 #### Generate doors
 
-* make; map_renderer --door-mode --door-width 200 && eog tmp_door.svg
+* make; map_renderer --door-mode --door-width 200 --door-sections 2 && eog tmp_door.svg

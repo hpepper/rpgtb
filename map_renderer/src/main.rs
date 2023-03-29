@@ -5,9 +5,13 @@ use std::env;
 use std::fs;
 use std::fs::File;
 
-const DEFAULT_NAME_SPACE: &str = "minidom";
+const APPLICATION_VERSION: &str = "0.3.0";
 
-const APPLICATION_VERSION: &str = "0.2.4";
+const DEFAULT_NAME_SPACE: &str = "minidom";
+const DOOR_HINGE_LEFT: bool = true;
+const DOOR_HINGE_RIGHT: bool = false;
+
+
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -49,19 +53,32 @@ fn main() {
 
         // TODO if there are two sections then split the door.
 
-        let endx= local_configuration.get_door_width();
-        let endy: usize = 100;
+        let mut file_handle = File::create("tmp_door.svg").expect("Error encountered while creating file!");
+        let full_door_width = local_configuration.get_door_width();
+        let door_sections_number = local_configuration.get_door_sections();
+
+        map_to_svg::lead_in(&mut file_handle, full_door_width + 20, full_door_width + 100);
+
+        let endx_first_door= full_door_width/door_sections_number;
+        let endy_first_door: usize = 100;
         let door = Door {
             m_start_x: 10,
             m_start_y: 100,
-            m_end_x: endx,
-            m_end_y: endy,
+            m_end_x: endx_first_door,
+            m_end_y: endy_first_door,
         };
+        map_to_svg::render_door(&mut file_handle, &door, 0, 0, DOOR_HINGE_LEFT);
 
-        let mut file_handle = File::create("tmp_door.svg").expect("Error encountered while creating file!");
+        if door_sections_number == 2 {
+            let right_door = Door {
+                m_start_x: endx_first_door,
+                m_start_y: endy_first_door,
+                m_end_x: full_door_width,
+                m_end_y: 100,
+            };
+            map_to_svg::render_door(&mut file_handle, &right_door, 0, 0, DOOR_HINGE_RIGHT);
+        }
 
-        map_to_svg::lead_in(&mut file_handle, endx + 20, endx + 100);
-        map_to_svg::render_door(&mut file_handle, &door, 0, 0);
         map_to_svg::lead_out(&mut file_handle);
     } else {
         let xml_string = fs
@@ -110,6 +127,7 @@ struct ConfigurationInformation {
     player_map_file: String,
 }
 
+
 impl ConfigurationInformation {
     fn new() -> Self {
         Self {
@@ -120,10 +138,10 @@ impl ConfigurationInformation {
             player_map_file: "player_map.svg".to_string(),
         }
     }
-    fn get_door_sections(self) -> usize {
+    fn get_door_sections(&self) -> usize {
         self.door_sections
     }
-    fn get_door_width(self) -> usize {
+    fn get_door_width(&self) -> usize {
         self.door_width
     }
     fn get_input_file_name<'a>(&'a self) -> &'a str {
@@ -142,6 +160,10 @@ impl ConfigurationInformation {
         match parameter {
             Some(filename) => {
                 self.door_sections = filename.parse::<usize>().unwrap();
+                if self.door_sections < 1 || self.door_sections > 2 {
+                    println!("EEE --door-sections can only be 1 or 2")
+                    // TODO fail here
+                }
             }
             None => { println!("EEE the parameter was not there set_door_width()") }
         }
