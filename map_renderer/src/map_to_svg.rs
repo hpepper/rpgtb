@@ -26,49 +26,63 @@ pub fn render_door(
     //    rename the vars to be better describing.
     let line_thickness: usize = 1;
 
-    let delta_x = door.m_end_x - door.m_start_x;
-    let delta_y = door.m_end_y - door.m_start_y;
-    let float_delta_x: f32 = delta_x as f32;
-    let float_delta_y: f32 = delta_y as f32;
+    // triangle_a - the hinge point of the door
+    let (triangle_a_x, triangle_a_y) = if left_hinged {
+        (0.0, 0.0)
+    } else {
+        (
+            (door.m_end_x as f32) - (door.m_start_x as f32),
+            (door.m_end_y as f32) - (door.m_start_y as f32),
+        )
+    };
 
-    println!("DDD render_door(x, {:#?}, {}, {}) ", door, room_base_x, room_base_y);
-
-    // These three line is my convoluted way to get the sqrt of the a² + b²
-    //  I know not how to to the sqrt directly
-    // let length = delta_x.pow(2) + delta_y.pow(2);
-    // let float_length: f32 = length as f32;
-    // TODO where should I use this?
-    // let door_width:f32 = float_length.sqrt();
+    // triangle_b - the the point of the door away from the hinge(handle point)
+    let (triangle_b_x, triangle_b_y) = if left_hinged {
+        (
+            (door.m_end_x as f32) - (door.m_start_x as f32),
+            (door.m_end_y as f32) - (door.m_start_y as f32),
+        )
+    } else {
+        (0.0, 0.0)
+    };
 
     let pi = 3.14;
     let degrees: f32 = 25.0;
     let radians = (degrees * pi) / 180.0;
 
-    let new_x = float_delta_x * radians.cos() - float_delta_y * radians.sin();
-    let new_y = float_delta_x * radians.sin() + float_delta_y * radians.cos();
-
-    let start_x = room_base_x + door.m_start_x;
-    let start_y = room_base_y + door.m_start_y;
-
-    if left_hinged {
-        file_handle
-            .write(&format!("<path d=\"M {} {}", start_x, start_y).as_bytes())
-            .expect("file write error");
-        file_handle
-            .write(&format!(" l {} {}", new_x, -new_y).as_bytes())
-            .expect("file write error");
+    // triangle_c - the open point of the door
+    let (triangle_c_x, triangle_c_y) = if left_hinged {
+        (radians.cos() * triangle_b_x, radians.sin() * triangle_b_x)
     } else {
-        file_handle
-            .write(
-                &format!(
-                    "<path d=\"M {} {}",
-                    2.0 * (start_x as f32) - new_x,
-                    (start_y as f32) - new_y
-                ).as_bytes()
-            )
-            .expect("file write error");
-        file_handle.write(&format!(" l {} {}", new_x, new_y).as_bytes()).expect("file write error");
-    }
+        (triangle_a_x - radians.cos() * triangle_a_x, radians.sin() * triangle_a_x)
+    };
+
+    /*
+      TODO kept here for when the doors are going to be done vertically.
+    println!("DDD render_door(x, {:#?}, {}, {}) ", door, room_base_x, room_base_y);
+    println!("DDD radians: {}, cos: {}, sin: {}", radians, radians.cos(), radians.sin());
+    println!(
+        "DDD triangle(A: {},{} B: {},{} C: {},{}) ",
+        triangle_a_x,
+        triangle_a_y,
+        triangle_b_x,
+        triangle_b_y,
+        triangle_c_x,
+        triangle_c_y
+    );
+   */
+
+    let start_x: f32 = (room_base_x as f32) + (door.m_start_x as f32);
+    let start_y: f32 = (room_base_y as f32) + (door.m_start_y as f32);
+
+    file_handle
+        .write(
+            &format!("<path d=\"M {} {}", start_x + triangle_a_x, start_y + triangle_a_y).as_bytes()
+        )
+        .expect("file write error");
+    file_handle
+        .write(&format!(" L {} {}", start_x + triangle_c_x, start_y - triangle_c_y).as_bytes())
+        .expect("file write error");
     file_handle.write(&format!(" \"").as_bytes()).expect("file write error");
     file_handle
         .write(&format!(" stroke=\"black\" fill=\"transparent\"").as_bytes())
@@ -78,46 +92,26 @@ pub fn render_door(
         .expect("file write error");
     file_handle.write(&format!("/>\n").as_bytes()).expect("file write error");
 
-    let end_x_open_door = (start_x as f32) + new_x;
-    let end_y_open_door = (start_y as f32) - new_y;
+    let curvepoint_y = triangle_c_y / 2.0;
 
-    if left_hinged {
-        // TODO do the circle thingy indicating the door openeing, using the M x y q xxxxx (quadratic bezier)
-        // https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
-        let curvepoint_x: f32 = ((door.m_end_x as f32) - end_x_open_door) / 2.0;
-        let curvepoint_y: f32 = (door.m_end_x as f32) - end_x_open_door;
-        let delta_end_curve_x: f32 = (door.m_end_x as f32) - end_x_open_door;
-        let delta_end_curve_y: f32 = (door.m_end_y as f32) - end_y_open_door;
-        file_handle
-            .write(&format!("<path d=\"M {} {}", end_x_open_door, end_y_open_door).as_bytes())
-            .expect("file write error");
-        file_handle
-            .write(&format!(" q {} {},", curvepoint_x, curvepoint_y).as_bytes())
-            .expect("file write error");
-        file_handle
-            .write(&format!(" {} {}\"", delta_end_curve_x, delta_end_curve_y).as_bytes())
-            .expect("file write error");
-    } else {
-        let curvepoint_x: f32 = ((door.m_end_x as f32) - end_x_open_door) / 2.0;
-        let curvepoint_y: f32 = (door.m_end_x as f32) - end_x_open_door;
-        let delta_end_curve_x: f32 = start_x as f32 - new_x;
-        let delta_end_curve_y: f32 =  new_y;
-        file_handle
-            .write(&format!("<path d=\"M {} {}", 2.0 * (start_x as f32) - new_x,
-            (start_y as f32) - new_y).as_bytes())
-            .expect("file write error");
-        file_handle
-            .write(&format!(" q {} {},", -curvepoint_x, curvepoint_y).as_bytes())
-            .expect("file write error");
-        file_handle
-            .write(&format!(" {} {}\"", -delta_end_curve_x, delta_end_curve_y).as_bytes())
-            .expect("file write error");
-    }
+    file_handle
+        .write(
+            &format!("<path d=\"M {} {}", start_x + triangle_b_x, start_y + triangle_b_y).as_bytes()
+        )
+        .expect("file write error");
+    file_handle
+        .write(&format!(" Q {} {},", start_x + triangle_b_x, start_y - curvepoint_y).as_bytes())
+        .expect("file write error");
+    file_handle
+        .write(&format!(" {} {}\"", start_x + triangle_c_x, start_y - triangle_c_y).as_bytes())
+        .expect("file write error");
+
     file_handle
         .write(&format!(" stroke=\"black\" fill=\"none\" stroke-width=\"1\"").as_bytes())
         .expect("file write error");
     file_handle.write(&format!("/>\n").as_bytes()).expect("file write error");
 }
+
 
 fn render_room(file_handle: &mut File, room: &crate::Room, gms_map: bool) {
     let line_thickness: usize = 2;
