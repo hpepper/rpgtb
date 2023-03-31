@@ -81,7 +81,7 @@ pub fn render_door(
         )
         .expect("file write error");
     file_handle
-        .write(&format!(" L {} {}", start_x + triangle_c_x, start_y - triangle_c_y).as_bytes())
+        .write(&format!(" l {} {}", triangle_c_x -triangle_a_x , - triangle_c_y + triangle_a_y).as_bytes())
         .expect("file write error");
     file_handle.write(&format!(" \"").as_bytes()).expect("file write error");
     file_handle
@@ -100,10 +100,10 @@ pub fn render_door(
         )
         .expect("file write error");
     file_handle
-        .write(&format!(" Q {} {},", start_x + triangle_b_x, start_y - curvepoint_y).as_bytes())
+        .write(&format!(" q {} {},", 0, -curvepoint_y).as_bytes())
         .expect("file write error");
     file_handle
-        .write(&format!(" {} {}\"", start_x + triangle_c_x, start_y - triangle_c_y).as_bytes())
+        .write(&format!(" {} {}\"", triangle_c_x-triangle_b_x,  - triangle_c_y).as_bytes())
         .expect("file write error");
 
     file_handle
