@@ -1,6 +1,10 @@
 use std::fs::File;
 use std::io::Write;
 
+// TODO make these references commonly
+const DOOR_HINGE_LEFT: bool = true;
+const DOOR_HINGE_RIGHT: bool = false;
+
 // TODO remove 'pub' when I don't need it for debugging the door gen.
 pub fn lead_in(file_handle: &mut File, map_width: usize, map_height: usize) {
     file_handle.write(b"<svg version=\"1.1\"\n").expect("file write error");
@@ -18,100 +22,137 @@ pub fn lead_out(file_handle: &mut File) {
 pub fn render_door(
     file_handle: &mut File,
     door: &crate::Door,
-    room_base_x: usize,
-    room_base_y: usize,
+    room_base_x: &usize,
+    room_base_y: &usize,
     left_hinged: bool
 ) {
-    // TODO Clean up this, my goodness..... reduce the number of vars?
-    //    rename the vars to be better describing.
-    let line_thickness: usize = 1;
+    println!("DDD Door: {:?}", door);
+    // If the length is two, then splite the door and call itself twice
+    if door.m_number_sections == 2 {
+        println!("DDD two sections");
+        let half_door_length = (door.m_end_x - door.m_start_x) / 2;
+        let left_door = crate::Door {
+            m_start_x: door.m_start_x,
+            m_start_y: door.m_start_y,
+            m_end_x: door.m_start_x + half_door_length,
+            m_end_y: door.m_end_y,
+            m_number_sections: 1,
+        };
+        render_door(file_handle, &left_door, &room_base_x, &room_base_y, DOOR_HINGE_LEFT);
 
-    // triangle_a - the hinge point of the door
-    let (triangle_a_x, triangle_a_y) = if left_hinged {
-        (0.0, 0.0)
+        let right_door = crate::Door {
+            m_start_x: door.m_start_x + half_door_length,
+            m_start_y: door.m_start_y,
+            m_end_x: door.m_end_x,
+            m_end_y: door.m_end_y,
+            m_number_sections: 1,
+        };
+        render_door(file_handle, &right_door, &room_base_x, &room_base_y, DOOR_HINGE_RIGHT);
     } else {
-        (
-            (door.m_end_x as f32) - (door.m_start_x as f32),
-            (door.m_end_y as f32) - (door.m_start_y as f32),
-        )
-    };
+        // TODO Clean up this, my goodness..... reduce the number of vars?
+        //    rename the vars to be better describing.
+        let line_thickness: usize = 1;
 
-    // triangle_b - the the point of the door away from the hinge(handle point)
-    let (triangle_b_x, triangle_b_y) = if left_hinged {
-        (
-            (door.m_end_x as f32) - (door.m_start_x as f32),
-            (door.m_end_y as f32) - (door.m_start_y as f32),
-        )
-    } else {
-        (0.0, 0.0)
-    };
+        // triangle_a - the hinge point of the door
+        let (triangle_a_x, triangle_a_y) = if left_hinged {
+            (0.0, 0.0)
+        } else {
+            (
+                (door.m_end_x as f32) - (door.m_start_x as f32),
+                (door.m_end_y as f32) - (door.m_start_y as f32),
+            )
+        };
 
-    let pi = 3.14;
-    let degrees: f32 = 25.0;
-    let radians = (degrees * pi) / 180.0;
+        // triangle_b - the the point of the door away from the hinge(handle point)
+        let (triangle_b_x, triangle_b_y) = if left_hinged {
+            (
+                (door.m_end_x as f32) - (door.m_start_x as f32),
+                (door.m_end_y as f32) - (door.m_start_y as f32),
+            )
+        } else {
+            (0.0, 0.0)
+        };
 
-    // triangle_c - the open point of the door
-    let (triangle_c_x, triangle_c_y) = if left_hinged {
-        (radians.cos() * triangle_b_x, radians.sin() * triangle_b_x)
-    } else {
-        (triangle_a_x - radians.cos() * triangle_a_x, radians.sin() * triangle_a_x)
-    };
+        let pi = 3.14;
+        let degrees: f32 = 25.0;
+        let radians = (degrees * pi) / 180.0;
 
-    /*
+        // triangle_c - the open point of the door
+        let (triangle_c_x, triangle_c_y) = if left_hinged {
+            (radians.cos() * triangle_b_x, radians.sin() * triangle_b_x)
+        } else {
+            (triangle_a_x - radians.cos() * triangle_a_x, radians.sin() * triangle_a_x)
+        };
+
+        /*
       TODO kept here for when the doors are going to be done vertically.
     println!("DDD render_door(x, {:#?}, {}, {}) ", door, room_base_x, room_base_y);
     println!("DDD radians: {}, cos: {}, sin: {}", radians, radians.cos(), radians.sin());
-    println!(
-        "DDD triangle(A: {},{} B: {},{} C: {},{}) ",
-        triangle_a_x,
-        triangle_a_y,
-        triangle_b_x,
-        triangle_b_y,
-        triangle_c_x,
-        triangle_c_y
-    );
    */
+        println!(
+            "DDD triangle(A: {},{} B: {},{} C: {},{}) ",
+            triangle_a_x,
+            triangle_a_y,
+            triangle_b_x,
+            triangle_b_y,
+            triangle_c_x,
+            triangle_c_y
+        );
 
-    let start_x: f32 = (room_base_x as f32) + (door.m_start_x as f32);
-    let start_y: f32 = (room_base_y as f32) + (door.m_start_y as f32);
+        let start_x: f32 = (*room_base_x as f32) + (door.m_start_x as f32);
+        let start_y: f32 = (*room_base_y as f32) + (door.m_start_y as f32);
 
-    file_handle
-        .write(
-            &format!("<path d=\"M {} {}", start_x + triangle_a_x, start_y + triangle_a_y).as_bytes()
-        )
-        .expect("file write error");
-    file_handle
-        .write(&format!(" l {} {}", triangle_c_x -triangle_a_x , - triangle_c_y + triangle_a_y).as_bytes())
-        .expect("file write error");
-    file_handle.write(&format!(" \"").as_bytes()).expect("file write error");
-    file_handle
-        .write(&format!(" stroke=\"black\" fill=\"transparent\"").as_bytes())
-        .expect("file write error");
-    file_handle
-        .write(&format!(" stroke-width=\"{}\"", line_thickness).as_bytes())
-        .expect("file write error");
-    file_handle.write(&format!("/>\n").as_bytes()).expect("file write error");
+        file_handle
+            .write(
+                &format!(
+                    "<path d=\"M {} {}",
+                    start_x + triangle_a_x,
+                    start_y + triangle_a_y
+                ).as_bytes()
+            )
+            .expect("file write error");
+        file_handle
+            .write(
+                &format!(
+                    " l {} {}",
+                    triangle_c_x - triangle_a_x,
+                    -triangle_c_y + triangle_a_y
+                ).as_bytes()
+            )
+            .expect("file write error");
+        file_handle.write(&format!(" \"").as_bytes()).expect("file write error");
+        file_handle
+            .write(&format!(" stroke=\"black\" fill=\"transparent\"").as_bytes())
+            .expect("file write error");
+        file_handle
+            .write(&format!(" stroke-width=\"{}\"", line_thickness).as_bytes())
+            .expect("file write error");
+        file_handle.write(&format!("/>\n").as_bytes()).expect("file write error");
 
-    let curvepoint_y = triangle_c_y / 2.0;
+        let curvepoint_y = triangle_c_y / 2.0;
 
-    file_handle
-        .write(
-            &format!("<path d=\"M {} {}", start_x + triangle_b_x, start_y + triangle_b_y).as_bytes()
-        )
-        .expect("file write error");
-    file_handle
-        .write(&format!(" q {} {},", 0, -curvepoint_y).as_bytes())
-        .expect("file write error");
-    file_handle
-        .write(&format!(" {} {}\"", triangle_c_x-triangle_b_x,  - triangle_c_y).as_bytes())
-        .expect("file write error");
+        file_handle
+            .write(
+                &format!(
+                    "<path d=\"M {} {}",
+                    start_x + triangle_b_x,
+                    start_y + triangle_b_y
+                ).as_bytes()
+            )
+            .expect("file write error");
+        file_handle
+            .write(&format!(" q {} {},", 0, -curvepoint_y).as_bytes())
+            .expect("file write error");
+        file_handle
+            .write(&format!(" {} {}\"", triangle_c_x - triangle_b_x, -triangle_c_y).as_bytes())
+            .expect("file write error");
 
-    file_handle
-        .write(&format!(" stroke=\"black\" fill=\"none\" stroke-width=\"1\"").as_bytes())
-        .expect("file write error");
-    file_handle.write(&format!("/>\n").as_bytes()).expect("file write error");
+        file_handle
+            .write(&format!(" stroke=\"black\" fill=\"none\" stroke-width=\"1\"").as_bytes())
+            .expect("file write error");
+        file_handle.write(&format!("/>\n").as_bytes()).expect("file write error");
+    }
 }
-
 
 fn render_room(file_handle: &mut File, room: &crate::Room, gms_map: bool) {
     let line_thickness: usize = 2;
@@ -142,7 +183,7 @@ fn render_room(file_handle: &mut File, room: &crate::Room, gms_map: bool) {
     }
     //
     for door in room.door_list.iter() {
-        render_door(file_handle, door, room.m_start_x, room.m_start_y, true);
+        render_door(file_handle, door, &room.m_start_x, &room.m_start_y, true);
     }
 }
 

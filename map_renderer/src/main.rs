@@ -5,7 +5,7 @@ use std::env;
 use std::fs;
 use std::fs::File;
 
-const APPLICATION_VERSION: &str = "0.3.1";
+const APPLICATION_VERSION: &str = "0.4.0";
 
 const DEFAULT_NAME_SPACE: &str = "minidom";
 const DOOR_HINGE_LEFT: bool = true;
@@ -61,27 +61,17 @@ fn main() {
 
         map_to_svg::lead_in(&mut file_handle, full_door_width + 200, full_door_width + 400);
 
-        let endx_first_door = full_door_width / door_sections_number;
-        let endy_first_door: usize = 100;
-        let start_x = 10;
-        let door = Door {
-            m_start_x: start_x,
-            m_start_y: endy_first_door,
-            m_end_x: start_x+endx_first_door,
-            m_end_y: endy_first_door,
-        };
-        map_to_svg::render_door(&mut file_handle, &door, local_configuration.get_start_x(), local_configuration.get_start_y(), DOOR_HINGE_LEFT);
-
-        if door_sections_number == 2 {
-            let right_door = Door {
-                m_start_x: start_x+endx_first_door,
-                m_start_y: endy_first_door,
-                m_end_x: start_x+full_door_width,
-                m_end_y: endy_first_door,
-            };
-            map_to_svg::render_door(&mut file_handle, &right_door, local_configuration.get_start_x(), local_configuration.get_start_y(), DOOR_HINGE_RIGHT);
-        }
-
+         let endy_first_door: usize = 100;
+         let start_x = 10;
+         let door = Door {
+             m_start_x: start_x,
+             m_start_y: endy_first_door,
+             m_end_x: full_door_width,
+             m_end_y: endy_first_door,
+             m_number_sections: 2,
+         };
+         map_to_svg::render_door(&mut file_handle, &door, &local_configuration.get_start_x(), &local_configuration.get_start_y(), DOOR_HINGE_LEFT);
+ 
         map_to_svg::lead_out(&mut file_handle);
     } else {
         let xml_string = fs
@@ -259,6 +249,7 @@ pub struct Door {
     m_start_y: usize,
     m_end_x: usize,
     m_end_y: usize,
+    m_number_sections: usize,
 }
 
 fn read_map_definitions(xml_root: &Element, base_unit_in_svg: usize) -> (usize, usize) {
@@ -292,6 +283,7 @@ fn load_a_door(xml_door: &Element, base_unit_in_svg: usize) -> Door {
     let ypos_str = xml_door.attr("starty").unwrap();
     let endx_str = xml_door.attr("endx").unwrap();
     let endy_str = xml_door.attr("endy").unwrap();
+    let sections_str = xml_door.attr("sections").unwrap();
     let xpos: usize = xpos_str.parse().unwrap();
     let ypos: usize = ypos_str.parse().unwrap();
     let endx: usize = endx_str.parse().unwrap();
@@ -302,6 +294,7 @@ fn load_a_door(xml_door: &Element, base_unit_in_svg: usize) -> Door {
         m_start_y: ypos * base_unit_in_svg,
         m_end_x: endx * base_unit_in_svg,
         m_end_y: endy * base_unit_in_svg,
+        m_number_sections: sections_str.parse().unwrap(),
     }
 }
 
