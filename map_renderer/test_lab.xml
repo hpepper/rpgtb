@@ -8,7 +8,7 @@
   <Room xpos="4" ypos="4" width="18" height="30">
     <gm_note></gm_note>
     <comment>the house</comment>
-    <Door startx="15" starty="26" endx="17" endy="26" sections="2"/><comment></comment>
+    <Door startx="15" starty="30" endx="17" endy="30" sections="2"/><comment></comment>
     <Window></Window>
   </Room>
 

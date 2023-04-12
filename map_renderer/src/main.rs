@@ -9,7 +9,7 @@ const APPLICATION_VERSION: &str = "0.4.0";
 
 const DEFAULT_NAME_SPACE: &str = "minidom";
 const DOOR_HINGE_LEFT: bool = true;
-const DOOR_HINGE_RIGHT: bool = false;
+// TODO remove const DOOR_HINGE_RIGHT: bool = false;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -57,7 +57,7 @@ fn main() {
             "Error encountered while creating file!"
         );
         let full_door_width = local_configuration.get_door_width();
-        let door_sections_number = local_configuration.get_door_sections();
+        // TODO remove let door_sections_number = local_configuration.get_door_sections();
 
         map_to_svg::lead_in(&mut file_handle, full_door_width + 200, full_door_width + 400);
 
@@ -136,7 +136,7 @@ impl ConfigurationInformation {
             start_y: 200,
         }
     }
-    fn get_door_sections(&self) -> usize {
+    fn _get_door_sections(&self) -> usize {
         self.door_sections
     }
 
