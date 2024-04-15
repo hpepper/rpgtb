@@ -49,4 +49,60 @@
     <Door startx="7" starty="0" endx="10" endy="0" sections="2"/>
     <Window></Window>
   </Room>
+
+  <Room xpos="15" ypos="4" width="7" height="5">
+    <gm_note>auto production</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="1" endx="0" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="15" ypos="9" width="7" height="2">
+    <gm_note>koeling</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="1" endx="0" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="15" ypos="11" width="7" height="3">
+    <gm_note>IT rum</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="1" endx="0" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="15" ypos="14" width="7" height="3">
+    <gm_note>Vagt rum</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="1" endx="0" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="15" ypos="17" width="7" height="4">
+    <gm_note>Varemodtagelse</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="2" endx="0" endy="3" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="17" ypos="22" width="5" height="1">
+    <gm_note>Toilet</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="1" endx="0" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="17" ypos="23" width="5" height="1">
+    <gm_note>Toilet</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="1" endx="0" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="17" ypos="24" width="5" height="2">
+    <gm_note>Kontor artikler</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="1" endx="0" endy="2" sections="1"/>
+    <Window></Window>
+  </Room>
+  <Room xpos="14" ypos="26" width="8" height="8">
+    <gm_note>reception</gm_note>
+    <comment></comment>
+    <Door startx="0" starty="0" endx="3" endy="0" sections="2"/>
+    <Window></Window>
+  </Room>
+
 </WorldDefinitions>

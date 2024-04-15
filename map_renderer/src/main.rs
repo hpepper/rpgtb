@@ -52,6 +52,7 @@ fn main() {
 
     if door_mode {
         // TODO if there are two sections then split the door.
+        let base_unit_in_svg: usize = 40;
 
         let mut file_handle = File::create("tmp_door.svg").expect(
             "Error encountered while creating file!"
@@ -59,7 +60,7 @@ fn main() {
         let full_door_width = local_configuration.get_door_width();
         // TODO remove let door_sections_number = local_configuration.get_door_sections();
 
-        map_to_svg::lead_in(&mut file_handle, full_door_width + 200, full_door_width + 400);
+        map_to_svg::lead_in(&mut file_handle, full_door_width + 200, full_door_width + 400, base_unit_in_svg);
 
          let endy_first_door: usize = 100;
          let start_x = 10;
@@ -94,6 +95,7 @@ fn main() {
             local_configuration.get_gm_map_file_name(),
             map_width,
             map_height,
+            base_unit_in_svg,
             room_list
         );
     }
@@ -265,7 +267,6 @@ fn read_map_definitions(xml_root: &Element, base_unit_in_svg: usize) -> (usize, 
  * load all doors, given in xml_room and return as a vector.
  */
 fn load_all_doors_in_a_room(xml_room: &Element, base_unit_in_svg: usize) -> Vec<Door> {
-    println!("load_door()  elment name: {}", xml_room.name());
     let mut door_list: Vec<Door> = Vec::new();
     for xml_child in xml_room.children() {
         if xml_child.name() == "Door" {

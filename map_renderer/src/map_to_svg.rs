@@ -6,13 +6,51 @@ const DOOR_HINGE_LEFT: bool = true;
 const DOOR_HINGE_RIGHT: bool = false;
 
 // TODO remove 'pub' when I don't need it for debugging the door gen.
-pub fn lead_in(file_handle: &mut File, map_width: usize, map_height: usize) {
+pub fn lead_in(
+    file_handle: &mut File,
+    map_width: usize,
+    map_height: usize,
+    base_unit_in_svg: usize
+) {
     file_handle.write(b"<svg version=\"1.1\"\n").expect("file write error");
     file_handle
         .write(&format!(" width=\"{}\" height=\"{}\"\n", map_width, map_height).as_bytes())
         .expect("file write error");
     file_handle.write(b" xmlns=\"http://www.w3.org/2000/svg\">\n").expect("file write error");
     file_handle.write(b"\n").expect("file write error");
+
+    // Set the markers for use in re-sizing in Roll20.
+    // <circle cx="50" cy="50" r="50" />
+    file_handle
+        .write(
+            &format!(
+                "<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" stroke=\"black\" fill=\"black\" stroke-width=\"1\"/>\n").as_bytes()
+        )
+        .expect("file write error");
+
+    file_handle
+        .write(
+            &format!(
+                "<path d=\"M {} {} l {} {}\" stroke=\"black\" fill=\"none\" stroke-width=\"1\"/>\n",
+                3 * base_unit_in_svg,
+                0,
+                0,
+                3
+            ).as_bytes()
+        )
+        .expect("file write error");
+
+    file_handle
+        .write(
+            &format!(
+                "<path d=\"M {} {} l {} {}\" stroke=\"black\" fill=\"none\" stroke-width=\"1\"/>\n",
+                0,
+                3 * base_unit_in_svg,
+                3,
+                0
+            ).as_bytes()
+        )
+        .expect("file write error");
 }
 
 pub fn lead_out(file_handle: &mut File) {
@@ -26,14 +64,13 @@ pub fn render_door(
     room_base_y: &usize,
     left_hinged: bool
 ) {
-    println!("DDD Door: {:?}", door);
+    //println!("DDD Door: {:?}", door);
     if door.m_start_y == door.m_end_y {
         render_door_horizontal(file_handle, &door, &room_base_x, &room_base_y, left_hinged);
     } else {
         render_door_vertical(file_handle, &door, &room_base_x, &room_base_y, left_hinged);
     }
 }
-
 
 pub fn render_door_horizontal(
     file_handle: &mut File,
@@ -42,10 +79,10 @@ pub fn render_door_horizontal(
     room_base_y: &usize,
     left_hinged: bool
 ) {
-    println!("DDD render_door_horizontal() Door: {:?}", door);
+    //println!("DDD render_door_horizontal() Door: {:?}", door);
     // If the length is two, then splite the door and call itself twice
     if door.m_number_sections == 2 {
-        println!("DDD two sections");
+        //println!("DDD two sections");
         let half_door_length = (door.m_end_x - door.m_start_x) / 2;
         let left_door = crate::Door {
             m_start_x: door.m_start_x,
@@ -101,10 +138,6 @@ pub fn render_door_horizontal(
         };
 
         /*
-      TODO kept here for when the doors are going to be done vertically.
-    println!("DDD render_door(x, {:#?}, {}, {}) ", door, room_base_x, room_base_y);
-    println!("DDD radians: {}, cos: {}, sin: {}", radians, radians.cos(), radians.sin());
-   */
         println!(
             "DDD triangle(A: {},{} B: {},{} C: {},{}) ",
             triangle_a_x,
@@ -114,6 +147,7 @@ pub fn render_door_horizontal(
             triangle_c_x,
             triangle_c_y
         );
+   */
 
         let start_x: f32 = (*room_base_x as f32) + (door.m_start_x as f32);
         let start_y: f32 = (*room_base_y as f32) + (door.m_start_y as f32);
@@ -138,7 +172,7 @@ pub fn render_door_horizontal(
             .expect("file write error");
         file_handle.write(&format!(" \"").as_bytes()).expect("file write error");
         file_handle
-            .write(&format!(" stroke=\"black\" fill=\"transparent\"").as_bytes())
+            .write(&format!(" stroke=\"black\" fill=\"none\"").as_bytes())
             .expect("file write error");
         file_handle
             .write(&format!(" stroke-width=\"{}\"", line_thickness).as_bytes())
@@ -170,7 +204,6 @@ pub fn render_door_horizontal(
     }
 }
 
-
 pub fn render_door_vertical(
     file_handle: &mut File,
     door: &crate::Door,
@@ -178,10 +211,10 @@ pub fn render_door_vertical(
     room_base_y: &usize,
     left_hinged: bool
 ) {
-    println!("DDD render_door_vertical() Door: {:?}", door);
+    //println!("DDD render_door_vertical() Door: {:?}", door);
     // If the length is two, then splite the door and call itself twice
     if door.m_number_sections == 2 {
-        println!("DDD two sections");
+        //println!("DDD two sections");
         let half_door_length = (door.m_end_y - door.m_start_y) / 2;
         let left_door = crate::Door {
             m_start_x: door.m_start_x,
@@ -237,10 +270,6 @@ pub fn render_door_vertical(
         };
 
         /*
-      TODO kept here for when the doors are going to be done vertically.
-    println!("DDD render_door(x, {:#?}, {}, {}) ", door, room_base_x, room_base_y);
-    println!("DDD radians: {}, cos: {}, sin: {}", radians, radians.cos(), radians.sin());
-   */
         println!(
             "DDD triangle(A: {},{} B: {},{} C: {},{}) ",
             triangle_a_x,
@@ -250,6 +279,7 @@ pub fn render_door_vertical(
             triangle_c_x,
             triangle_c_y
         );
+   */
 
         let start_x: f32 = (*room_base_x as f32) + (door.m_start_x as f32);
         let start_y: f32 = (*room_base_y as f32) + (door.m_start_y as f32);
@@ -274,7 +304,7 @@ pub fn render_door_vertical(
             .expect("file write error");
         file_handle.write(&format!(" \"").as_bytes()).expect("file write error");
         file_handle
-            .write(&format!(" stroke=\"black\" fill=\"transparent\"").as_bytes())
+            .write(&format!(" stroke=\"black\" fill=\"none\"").as_bytes())
             .expect("file write error");
         file_handle
             .write(&format!(" stroke-width=\"{}\"", line_thickness).as_bytes())
@@ -296,7 +326,7 @@ pub fn render_door_vertical(
             .write(&format!(" q {} {},", curvepoint_x, 0).as_bytes())
             .expect("file write error");
         file_handle
-            .write(&format!(" {} {}\"", triangle_c_x,  triangle_b_y - triangle_c_y).as_bytes())
+            .write(&format!(" {} {}\"", triangle_c_x, triangle_b_y - triangle_c_y).as_bytes())
             .expect("file write error");
 
         file_handle
@@ -311,7 +341,7 @@ fn render_room(file_handle: &mut File, room: &crate::Room, gms_map: bool) {
     file_handle
         .write(
             &format!(
-                "<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" stroke=\"black\" fill=\"transparent\" stroke-width=\"{}\"/>\n",
+                "<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" stroke=\"black\" fill=\"none\" stroke-width=\"{}\"/>\n",
                 room.m_start_x,
                 room.m_start_y,
                 room.m_width,
@@ -343,11 +373,12 @@ fn render_to_file(
     file_name: &str,
     map_width: usize,
     map_height: usize,
+    base_unit_in_svg: usize,
     room_list: &Vec<crate::Room>,
     gms_map: bool
 ) {
     let mut file_handle = File::create(file_name).expect("Error encountered while creating file!");
-    lead_in(&mut file_handle, map_width, map_height);
+    lead_in(&mut file_handle, map_width, map_height, base_unit_in_svg);
     for room in room_list.iter() {
         render_room(&mut file_handle, room, gms_map);
     }
@@ -359,11 +390,12 @@ pub fn render(
     gm_map_name: &str,
     map_width: usize,
     map_height: usize,
+    base_unit_in_svg: usize,
     room_list: Vec<crate::Room>
 ) {
     println!("III render maps");
     println!("III   player map: {}", player_map_name);
     println!("III   gm map    : {}", gm_map_name);
-    render_to_file(player_map_name, map_width, map_height, &room_list, false);
-    render_to_file(gm_map_name, map_width, map_height, &room_list, true);
+    render_to_file(player_map_name, map_width, map_height, base_unit_in_svg, &room_list, false);
+    render_to_file(gm_map_name, map_width, map_height, base_unit_in_svg, &room_list, true);
 }
