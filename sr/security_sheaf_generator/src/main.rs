@@ -2,7 +2,17 @@ use std::env;
 
 use rand::Rng;
 
-const APPLICATION_VERSION: &str = "0.1.0";
+const APPLICATION_VERSION: &str = "0.2.0";
+
+const ALERT_STATE_NO_ALERT: usize = 0;
+const ALERT_STATE_PASSIVE_ALERT: usize = 1;
+const ALERT_STATE_ACTIVE_ALERT: usize = 2;
+const ALERT_STATE_SHUTDOWN: usize = 3;
+
+const STATE_TRANSITION_TO_PASSIVE: &str = "=> Passive";
+const STATE_TRANSITION_TO_ACTIVE: &str = "=> Active";
+const STATE_TRANSITION_TO_SHUTDOWN: &str = "=> Shutdown";
+
 
 fn main() {
     println!("Security sheaf generator - {}", APPLICATION_VERSION);
@@ -51,45 +61,64 @@ fn main() {
     let die_roll_modifier = get_die_roll_modifier_for_security_code(&system_security_code);
 
     println!("DDD System Security Code: {}, Die roll modifier: {}, Security Value: {}", system_security_code, die_roll_modifier, system_security_value);
-    let mut alert_level: usize = 0;
-    // let trigger_step = (d6() / 2) + die_roll_modifier;
-    println!("{}\t{}\t\t\t{}\t\t\t{}", "Step", "No Alert", "Passive Alert", "Active Alert");
-    for steps_passed in 0..7 {
-        alert_level += (d6() / 2) + die_roll_modifier;
-        // TODO catch if there is a move to the next alert level, like passive alert, or shutdown, becuase then nothing else will happen after that
-        // only single tabs('\t') between columns, so there is room for long text.
-        println!("{}\t{}\t{}\t{}", alert_level, get_no_alert_entry(&system_security_code, d6()+steps_passed, system_security_value), get_passive_alert_entry(&system_security_code, d6()+steps_passed, system_security_value),get_active_alert_entry(&system_security_code, d6()+steps_passed, system_security_value));
+
+
+    let mut trigger_step: usize = 0;
+    let mut current_alert_state: usize = ALERT_STATE_NO_ALERT;
+    let mut events_in_state: usize = 0;
+
+    println!("{}\t{}", "Step", "Event");
+    while (current_alert_state != ALERT_STATE_SHUTDOWN) && (trigger_step < 100) {
+        trigger_step += (d6() / 2) + die_roll_modifier;
+        println!("{}\t{}", trigger_step, get_alert_entry(&mut current_alert_state, &mut events_in_state, system_security_value));
     }
 }
 
-fn get_no_alert_entry(_system_security_code: &String, trigger_step: usize, system_security_value: usize) -> String {
+fn get_alert_entry(current_alert_state: &mut usize, events_in_state: &mut usize, system_security_value: usize) -> String {
+    let event: String = match *current_alert_state {
+        ALERT_STATE_NO_ALERT => get_no_alert_entry(d6()+*events_in_state, system_security_value),
+        ALERT_STATE_PASSIVE_ALERT => get_passive_alert_entry(d6()+*events_in_state, system_security_value),
+        ALERT_STATE_ACTIVE_ALERT => get_active_alert_entry(d6()+*events_in_state, system_security_value),
+        _ => STATE_TRANSITION_TO_SHUTDOWN.to_string(),
+    };
+
+    match event.as_str() {
+        STATE_TRANSITION_TO_PASSIVE => {*current_alert_state = ALERT_STATE_PASSIVE_ALERT; *events_in_state = 0},
+        STATE_TRANSITION_TO_ACTIVE => {*current_alert_state = ALERT_STATE_ACTIVE_ALERT; *events_in_state = 0},
+        STATE_TRANSITION_TO_SHUTDOWN => {*current_alert_state = ALERT_STATE_SHUTDOWN; *events_in_state = 0},
+        _ => { *events_in_state += 1 }
+    }
+    event
+}
+
+fn get_no_alert_entry(trigger_step: usize, system_security_value: usize) -> String {
     match trigger_step {
         1..=3 => reactive_white_ic(system_security_value),
         4..=5 => proactive_white_ic(system_security_value),
         6..=7 => reactive_gray_ic(system_security_value),
-        8.. => "=> to Passive Alert\t".to_string(),
+        8.. => STATE_TRANSITION_TO_PASSIVE.to_string(),
         _ => { println!("EEE Unexpected trigger level: {}", trigger_step); "EEE".to_string() }
         
     }
 }
 
-fn get_passive_alert_entry(_system_security_code: &String, trigger_step: usize, system_security_value: usize) -> String {
+fn get_passive_alert_entry(trigger_step: usize, system_security_value: usize) -> String {
     match trigger_step {
         1..=3 => proactive_white_ic(system_security_value),
         4 | 5 => reactive_gray_ic(system_security_value),
         6 | 7 => proactive_gray_ic(system_security_value),
-        8.. => "=> Active Alert\t\t".to_string(),
+        8.. => STATE_TRANSITION_TO_ACTIVE.to_string(),
         _ => { println!("EEE Unexpected trigger level: {}", trigger_step); "EEE".to_string() }
         
     }
 }
 
-fn get_active_alert_entry(_system_security_code: &String, trigger_step: usize, system_security_value: usize) -> String {
+fn get_active_alert_entry(trigger_step: usize, system_security_value: usize) -> String {
     match trigger_step {
         1..=3 => proactive_white_ic(system_security_value),
         4 | 5 => proactive_gray_ic(system_security_value),
         6 | 7 => black_ic(system_security_value),
-        8.. => "Shutdown".to_string(),
+        8.. => STATE_TRANSITION_TO_SHUTDOWN.to_string(),
         _ => { println!("EEE Unexpected trigger level: {}", trigger_step); "EEE".to_string() }
         
     }
